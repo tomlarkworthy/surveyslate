@@ -6,8 +6,10 @@
 ~~~
 ```
 
+https://observablehq.com/@tomlarkworthy/aws4fetch
+
 ```js echo
-const aws4fetch = async () => {
+const aws4fetch = await (async () => {
   const response = await new Response(
     (
       await FileAttachment("aws4fetch.esm.js.gz").stream()
@@ -24,7 +26,8 @@ const aws4fetch = async () => {
   } finally {
     URL.revokeObjectURL(objectURL); // Ensure URL is revoked after import
   }
-}
+})();
+display(aws4fetch)
 ```
 
 

@@ -13,6 +13,8 @@ In this notebook we note that a "_viewof_" can act like an RxJS Observable. It w
 
 In this notebook we explore how some of RxJS's operators can solve some common Observablehq dataflow gotchas.
 
+
+
 ## Fizz Buzz Example
 
 Walking through an implementation of FizzBuzz using stream operator's introduces the coding style. 
@@ -20,8 +22,24 @@ Walking through an implementation of FizzBuzz using stream operator's introduces
 RxJS has a "creation" operator called [_interval_](https://rxjs.dev/api/index/function/interval) that creates a reactive stream that emits in incrementing numbers every "period" milliseconds. We can do the same thing:-
 
 ```js echo
-const counter = view(interval({ period: 500, invalidation }))
+//const counter = view(interval({ period: 500, invalidation }))
+const counter = interval({ period: 500, invalidation })
 ```
+
+```js echo
+const counterView = Generators.input(counter);
+display(counterView)
+```
+
+
+```js echo
+counter
+```
+
+```js echo
+counterView 
+```
+
 
 With our _interval_ it returns a "viewof" as opposed to an _Observable_. We also have to pass in the _invalidation_ promise so that if the cell is reevaluated the timer is removed. Note: all our stream operators need the invalidation promise passed in.
 
@@ -36,15 +54,30 @@ Lets implement FizzBuzz as two independently combined streams, Fizz and Buzz.
 For Fizz, we emit Fizz if we see the counter is divisible by 3, otherwise we emit null. We can use a reactive ["map"](https://rxjs.dev/api?query=map). Our input view is our previous viewof (not the data channel!)
 
 ```js echo
-const fizz = view(map({
+const fizz = map({
   view: counter,
   map: (count) => {
     if (count % 3 == 0) return "Fizz";
     return null;
   },
   invalidation
-}))
+})
 ```
+
+```js echo
+const fizzView = Generators.input(fizz)
+```
+
+
+```js echo
+fizz
+```
+
+
+```js echo
+fizzView
+```
+
 
 Note the result of the map is another viewof, which depends only on the previous viewof counter, so is not affected by dataflow either but the underlying data channel is recomputing at the same rate as _counter_ (see below)
 
@@ -55,18 +88,28 @@ fizz
 Buzz is the same thing but for numbers divisible by 5 numbers.
 
 ```js echo
-const buzz = view(map({
+const buzz = map({
   view: counter,
   map: (count) => {
     if (count % 5 == 0) return "Buzz";
     return null;
   },
   invalidation
-}))
+})
 ```
+
+
+```js echo
+const buzzView = Generators.input(buzz)
+```
+
 
 ```js echo
 buzz
+```
+
+```js echo
+buzzView
 ```
 
 Now lets try to combine streams. In FizzBuzz you either say fizz or buzz or both if the number is divisible by 5 and 3. If the number is not any of those you say the number. So we need to combine three streams (Fizz, Buzz and Counter).
@@ -77,15 +120,29 @@ Our viewof -> RxJS mapping converts the passed in viewof streams to values inter
 
 
 ```js echo
-const fizzBuzzCombineLatest = view(combineLatest({
+const fizzBuzzCombineLatest = combineLatest({
   // three views
   views: [counter, fizz, buzz],
   // three **values**
   map: (count, fizz, buzz) =>
     fizz && buzz ? fizz + buzz : fizz || buzz || count,
   invalidation
-}))
+})
 ```
+
+
+
+```js echo
+const fizzBuzzCombineLatestView = Generators.input(fizzBuzzCombineLatest)
+```
+
+```js echo
+fizzBuzzCombineLatest
+```
+```js echo
+fizzBuzzCombineLatestView
+```
+
 
 _fizzBuzzCombineLatest_ shows the glitchiness of combining synchronised streams with _combineLatest_, sometimes there are extra frames merging a previous value to a new value, depending on the order of evaluation. 
 
@@ -98,16 +155,29 @@ fizzBuzzCombineLatest
 We can count the number of updates with a scan
 
 ```js echo
-const countFizzBuzzCombineLatest = view(scan({
+const countFizzBuzzCombineLatest = scan({
   view: fizzBuzzCombineLatest,
   seed: 0,
   scan: (acc, element) => acc + 1,
   invalidation
-}))
+})
 ```
+
+
+
+```js echo
+const countFizzBuzzCombineLatestView = Generators.input(countFizzBuzzCombineLatest)
+```
+
+
 
 ```js echo
 countFizzBuzzCombineLatest
+```
+
+
+```js echo
+countFizzBuzzCombineLatestView
 ```
 
 Now we can clearly see that there are three updates per clock update! This is a common source of bugs in Observable reactive programming! Merging multiple active dataflow add the rate of updates, furthermore the order of the cell updates is indeterminate. ObservableHQ dataflow is most analogous to RxJS's combineLatest operator.
@@ -115,40 +185,67 @@ Now we can clearly see that there are three updates per clock update! This is a 
 RxJS has an alternative solution, the [zip](https://www.learnrxjs.io/learn-rxjs/operators/combination/zip) operator, which waits until every stream emits before emitting an array of those values.
 
 ```js echo
-const fizzBuzzZipArray = view(zip({
+const fizzBuzzZipArray = zip({
   views: [counter, fizz, buzz],
   invalidation
-}))
+})
 ```
+
+
+```js echo
+const fizzBuzzZipArrayView = Generators.input(fizzBuzzZipArray)
+```
+
 
 ```js echo
 fizzBuzzZipArray
 ```
 
+```js echo
+fizzBuzzZipArrayView
+```
+
 For zip and combineLatest you can add a map parameter to transform the stream inline.
 
 ```js echo
-const fizzBuzzZip = view(zip({
+const fizzBuzzZip = zip({
   views: [counter, fizz, buzz],
   map: (count, fizz, buzz) =>
     fizz && buzz ? fizz + buzz : fizz || buzz || count,
   invalidation
-}))
+})
 ```
+
+
+```js echo
+const fizzBuzzZipView = Generators.input(fizzBuzzZip)
+```
+
 
 ```js echo
 fizzBuzzZip
 ```
 
+
+
+```js echo
+fizzBuzzZipView
+```
+
 Now when we count the downstream updates we get one update every 500 millis! We solved FizzBuzz the stream orientated way!
 
 ```js echo
-const countFizzBuzzZip = view(scan({
+const countFizzBuzzZip = scan({
   view: fizzBuzzZip,
   seed: 0,
   scan: (acc, element) => acc + 1,
   invalidation
-}))
+})
+```
+
+
+```js echo
+const countFizzBuzzZipView = Generators.input(countFizzBuzzZip)
 ```
 
 ```js echo
@@ -168,63 +265,116 @@ We can fix this with stream operators, if a map function returns undefined, no u
 In the following function we will create a cell that updates once a second by only emitting if the counter is even, thereby halving the frequency of updates
 
 ```js echo
-const evens = view(map({
+const evens = map({
   view: counter,
   map: (v) => (v % 2 ? undefined : v),
   invalidation
-}))
+})
 ```
+
+
+```js echo
+const evensView = Generators.input(evens)
+```
+
+
+
 
 ```js echo
 evens
 ```
+
+
+```js echo
+evensView
+```
+
 
 #### Deduplication
 
 Another common difficulty is preventing duplicate updates, this organically arrises when filtering collections. Often minor perturbations of the selection criteria lead to the same sub-selection, so why cascade that change downstream? More generally, if a cell output is the same, there is no need to propagate a change. We can use scan to achieve this.
 
 ```js echo
-const headsOrTails = view(map({
+const headsOrTails = map({
   view: counter,
   map: (v) => (Math.random() > 0.5 ? "Heads" : "Tails"),
   invalidation
-}))
+})
 ```
+
+
+
+```js echo
+const headsOrTailsView = Generators.input(headsOrTails)
+```
+
+
+
 
 ```js echo
 headsOrTails
 ```
 
+
 ```js echo
-const deduped = view(scan({
+headsOrTailsView
+```
+
+```js echo
+const deduped = scan({
   view: headsOrTails,
   scan: (acc, value) => (acc !== value ? value : undefined),
   invalidation
-}))
+})
 ```
+
+```js echo
+const dedupedView = Generators.input(deduped)
+```
+
+
 
 ```js echo
 deduped
 ```
+
+
+
+```js echo
+dedupedView
+```
+
 
 #### Temporal Rate Measurement
 
 The scan is pretty flexible. We can compute a running rate computation. First we map a stream to timestamps, scan to collect those within the last 5 seconds, then compute the average.
 
 ```js echo
-const timestamp = view(map({
+const timestamp = map({
   view: deduped,
   map: () => performance.now(),
   invalidation
-}))
+})
 ```
+
+```js echo
+const timestampView = Generators.input(timestamp)
+```
+
+
 
 ```js echo
 timestamp
 ```
 
+
+
 ```js echo
-const last_5_secs = view(scan({
+timestampView
+```
+
+```js echo
+const last_5_secs = scan({
   view: timestamp,
   seed: [],
   scan: (acc, next) => {
@@ -233,27 +383,49 @@ const last_5_secs = view(scan({
     return acc;
   },
   invalidation
-}))
+})
 ```
+
+```js echo
+const last_5_secsView = Generators.input(last_5_secs)
+```
+
+
 
 ```js echo
 last_5_secs
 ```
 
+
 ```js echo
-const rate = view(map({
+last_5_secsView
+```
+
+
+```js echo
+const rate = map({
   view: last_5_secs,
   map: (array) => array.length / (0.001 * (array.at(-1) - array.at(1))),
   invalidation
-}))
+})
 ```
 
+
+```js echo
+const rateView = Generators.input(rate)
+```
+
+
 ${rate} per second
+
+
+${rateView} per second
+
 
 We don't actually need to do these computations in different cells, you can wire everything up purely in imperative code if you want. It looks ugly as hell though.
 
 ```js echo
-const rate2 = view(map({
+const rate2 = map({
   map: (array) => array.length / (0.001 * (array.at(-1) - array.at(1))),
   view: scan({
     seed: [],
@@ -270,10 +442,19 @@ const rate2 = view(map({
     invalidation
   }),
   invalidation
-}))
+})
+```
+
+
+```js echo
+const rate2View = Generators.input(rate2)
 ```
 
 ${rate2} per second
+
+
+${rate2View} per second
+
 
 ## Operator Implementation
 

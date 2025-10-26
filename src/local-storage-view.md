@@ -34,69 +34,84 @@ This works with an view that follows [design guidelines for views](https://obser
 So starting with an ordinary control:
 
 ```js echo
-const example1 = view(Inputs.range())
+const example_base = Inputs.range()
+const example1 = view(example_base)
+```
+
+
+```js echo
+display(example_base)
+```
+
+```js echo
+example1
+```
+
+```js echo
+//const example1 = Generators.input(example_base);
+//const example1 = Generators.input(example1Element)
 ```
 
 We will use the excellent  [@mbostock/safe-local-storage](/@mbostock/safe-local-storage) which very nicely abstracts over enhanced privacy controls with an in memory fallback.
 
 ```js echo
 //import { localStorage } from '@mbostock/safe-local-storage'
-import { localStorage } from './safe-local-storage.js';
+import { localStorage } from '/components/safe-local-storage.js';
 display(localStorage)
-```
-
-
-```js echo
-//added DOM control
-import {DOM} from "/components/DOM.js";
 ```
 
 
 However, we don't want to have to mess around with our original control to add local persistence. Instead we create a writable [view](https://observablehq.com/@observablehq/introduction-to-views) of a local storage key
 
 ```js echo
-const example1storage = view(localStorageView("example1"))
+const example1storage = localStorageView("example1");
 ```
 
 ```js echo
-const localStorageView = (
-  key,
-  { bindTo = undefined, defaultValue = null, json = false } = {}
-) => {
+example1storage 
+```
+
+```js
+display(example1storage)
+```
+
+```js echo
+function localStorageView(key, { bindTo, defaultValue = null, json = false } = {}) {
   const id = DOM.uid().id;
-  const ui = htl.html`<div class="observablehq--inspect" style="display:flex">
-    <code>localStorageView(<span class="observablehq--string">"${key}"</span>): </code><span id="${id}">${inspect(
-    localStorage.getItem(key) || defaultValue
-  )}</span>
+
+  const readRaw = () => localStorage.getItem(key);
+  const readValue = () => {
+    const raw = readRaw();
+    if (raw == null) return defaultValue;
+    if (!json) return raw;
+    try { return JSON.parse(raw); } catch { return defaultValue; }
+  };
+
+  const ui = htl.html`<div class="observablehq--inspect" style="display:flex; gap:.5rem;">
+    <code>localStorageView(<span class="observablehq--string">"${key}"</span>):</code>
+    <span id="${id}"></span>
   </div>`;
   const holder = ui.querySelector(`#${id}`);
+  holder.textContent = String(readValue());
 
-  const view = Object.defineProperty(ui, "value", {
-    get: () => {
-      const val = json
-        ? JSON.parse(localStorage.getItem(key))
-        : localStorage.getItem(key);
-      return val || defaultValue;
-    },
+  Object.defineProperty(ui, "value", {
+    get: readValue,
     set: (value) => {
-      value = json ? JSON.stringify(value) : value;
-      holder.removeChild(holder.firstChild);
-      holder.appendChild(inspect(localStorage.getItem(key) || defaultValue));
-      localStorage.setItem(key, value);
+      const toStore = json ? JSON.stringify(value) : value;
+      localStorage.setItem(key, toStore);
+      holder.textContent = String(readValue());
     },
     enumerable: true
   });
 
-  if (bindTo) {
-    Inputs.bind(bindTo, view);
-  }
-
-  return view;
+  if (bindTo) Inputs.bind(bindTo, ui);
+  return ui;
 }
+display(localStorageView)
 ```
 
-```js echo
-localStorageView.value
+```js
+//localStorageView.value
 ```
 
 And we bind our original control to the key view
@@ -105,7 +120,7 @@ And we bind our original control to the key view
 ```js echo
 // Note you need to get these the right way round to have the page load work correctly
 // CHECK TO DETERMINE THAT THIS BINDING PARAMETER IS CORRECT FOR FRAMEWORK
-Inputs.bind(example1, example1storage)
+Inputs.bind(display(Inputs.bind(Inputs.range(), example_base)), example1storage)
 ```
 
 Tada! that control will now persist its state across page refreshes.
@@ -167,9 +182,17 @@ You can even declare a UI control, wrap it with local storage and return in a si
 const example3 = view(Inputs.bind(Inputs.textarea(), localStorageView("example3")))
 ```
 
+
+```js echo
+//added DOM control
+import {DOM} from "/components/DOM.js";
+display(DOM)
+```
+
 ```js
 //import { inspect } from "@tomlarkworthy/inspector"
-import { inspect } from "./inspector.js"
+import { inspect } from "/components/inspector.js";
+display(inspect)
 ```
 
 ```js echo

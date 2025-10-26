@@ -1,6 +1,10 @@
 # cellMap
 ## computes the mapping of reactive variables to higher level notebook cells, grouped by module
 
+<!--
+https://observablehq.com/@tomlarkworthy/cell-map
+-->
+
 ```js
 viewof showBuiltins = Inputs.toggle({ label: "builtins?", value: false })
 ```
@@ -534,19 +538,19 @@ import { tests } from "@tomlarkworthy/tests"
 
 ## testing
 
-```js
+```js echo
 tests({
   filter: (t) =>
     t.name.includes("@tomlarkworthy/cell-map") || t.name.includes("main")
 })
 ```
 
-```js
-modules = moduleMap(runtime)
+```js echo
+const modules = moduleMap(runtime)
 ```
 
-```js
-moduleLookup = new Map([...modules.values()].map((info) => [info.name, info]))
+```js echo
+const moduleLookup = new Map([...modules.values()].map((info) => [info.name, info]))
 ```
 
 low-level variables in this module
@@ -575,21 +579,25 @@ Inputs.table(
 )
 ```
 
-```js
-unreached_main_import = toObject &&
+```js echo
+const unreached_main_import = toObject &&
   lookupVariable("repositionSetElement", cellMapModule)
 ```
 
-```js
-reached_main_import = runtime && lookupVariable("runtime", cellMapModule)
+```js echo
+const reached_main_import = runtime && lookupVariable("runtime", cellMapModule)
 ```
+
+<!--
+NEED TO CHANGE MUTABLES
+--->
 
 ```js
 mutable main_mutable = "OK"
 ```
 
 ```js
-test_importedModule = {
+const test_importedModule = {
   expect(modules.get(await importedModule(reached_main_import)).name).toBe(
     "@tomlarkworthy/module-map"
   );
@@ -602,8 +610,8 @@ test_importedModule = {
 }
 ```
 
-```js
-test_findModuleName = {
+```js echo
+const test_findModuleName = {
   expect(
     findModuleName(await importedModule(reached_main_import), modules)
   ).toBe("@tomlarkworthy/module-map");
@@ -616,8 +624,8 @@ test_findModuleName = {
 }
 ```
 
-```js
-test_cellmap_mutable = {
+```js echo
+const test_cellmap_mutable = {
   const initialMutable =
     main_mutable &&
     (await lookupVariable("initial main_mutable", cellMapModule));
@@ -640,18 +648,26 @@ test_cellmap_mutable = {
 }
 ```
 
-### Ntoebook 2.0 Compatability
+### Notebook 2.0 Compatibility
+
+<!--
+NEED TO EXAMINE VIEWOF
+--->
+
 
 ```js
-cellMapVizView = viewof cellMapViz
+const cellMapVizView = viewof cellMapViz
 ```
 
-detailVizView = viewof detailViz
+```js
+const detailVizView = viewof detailViz
+```
+
 
 ### Utilities
 
-```js
-importedModule = async (v) => {
+```js echo
+const importedModule = async (v) => {
   if (
     // imported variable is observed
     v._inputs.length == 1 && // always a single dependancy
@@ -711,11 +727,12 @@ importedModule = async (v) => {
   }
 
   return null;
-}
+};
+display(importedModule)
 ```
 
-```js
-findModuleName = (module, moduleMap, { unknown_id = Math.random() } = {}) => {
+```js echo
+const findModuleName = (module, moduleMap, { unknown_id = Math.random() } = {}) => {
   try {
     const lookup = moduleMap.get(module);
     if (lookup) return lookup.name;
@@ -724,9 +741,12 @@ findModuleName = (module, moduleMap, { unknown_id = Math.random() } = {}) => {
     debugger;
     return "error";
   }
-}
+};
+display(findModuleName)
 ```
 
-```js
-import { hash } from "@jashkenas/url-querystrings-and-hash-parameters"
+```js echo
+//import { hash } from "@jashkenas/url-querystrings-and-hash-parameters"
+import { hash } from "/components/url-querystrings-and-hash-parameters.js";
+display(hash)
 ```

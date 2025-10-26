@@ -1845,29 +1845,38 @@ const firestore = firebase.firestore()
 ```
 
 ```js echo
-const database = {
+const database = () => {
   const db = firebase.database();
   db.goOffline();
   return db;
 }
 ```
 
-```js
-import { view, variable, cautious } from '@tomlarkworthy/view'
+```js echo
+//import { view, variable, cautious } from '@tomlarkworthy/view'
+import { viewUI, variable, cautious } from '/components/view.js';
+display(viewUI);
+display(variable);
+display(cautious)
 ```
 
-```js
-import { viewroutine, ask } from '@tomlarkworthy/viewroutine'
+```js echo
+//import { viewroutine, ask } from '@tomlarkworthy/viewroutine'
+import { viewroutine, ask } from '/components/viewroutine.js'
+display(viewroutine);
+display(ask)
 ```
 
-```js
+```js echo
 //import { toc } from "@nebrius/indented-toc"
-import { toc } from "/components/indented-toc.js"
+import { toc } from "/components/indented-toc.js";
+display(toc)
 ```
 
-```js
+```js echo
 //import { randomId } from '@tomlarkworthy/randomid'
-import { randomId } from '/components/randomid.js'
+import { randomId } from '/components/randomid.js';
+display(randomId)
 ```
 
 ```js

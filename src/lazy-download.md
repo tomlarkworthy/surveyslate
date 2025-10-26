@@ -1,7 +1,9 @@
-```js
-md`# Lazy Download
+# Lazy Download
 
-An alternative to DOM.download that lazily computes the value to be downloaded, and allows the value to be specified asynchronously. However, the downside is that two clicks are required if the value is asynchronous: first to save the value, and then the second to download it.`
+An alternative to DOM.download that lazily computes the value to be downloaded, and allows the value to be specified asynchronously. However, the downside is that two clicks are required if the value is asynchronous: first to save the value, and then the second to download it.
+
+```js
+import {Promises} from "/components/promises.js"
 ```
 
 ```js echo

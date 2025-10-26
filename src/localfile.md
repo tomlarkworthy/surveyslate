@@ -5,15 +5,25 @@
 A hack to treat a local file as an Observable FileAttachment, so that you get all the same conveniences (*e.g.*, loading CSV or SQLite). Pass the *value* option to set the initial value to a file attachment.
 
 ```js echo
-const file = view(localFileInput({accept: ".db"}))
+const fileView = localFileInput({accept: ".db"})
+```
+
+
+```js echo
+const file = Generators.input(fileView)
 ```
 
 ```js echo
-const db = file.sqlite()
+fileView
+```
+
+
+```js echo
+const db = display(await file.sqlite())
 ```
 
 ```js echo
-db.describe()
+display(await db.describe())
 ```
 
 ```js echo
@@ -45,7 +55,8 @@ class LocalFile extends AbstractFile {
   async stream() {
     return this._.stream();
   }
-}
+};
+display(LocalFile)
 ```
 
 ```js echo

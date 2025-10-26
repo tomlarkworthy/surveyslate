@@ -1,9 +1,12 @@
 //# Composing views across time: viewroutine
 // THIS NOTEBOOKS NEEDS WORK - THE MUTABLE ISN'T PROPERLY DEFINED
 
+import * as Inputs from "/components/inputs_observable.js";
 
-import {Promises} from "/components/promises.js"
-import markdownit from "npm:markdown-it";
+import * as Promises from "/components/promises.js"
+import { Mutable } from "@observablehq/stdlib";
+
+import markdownit from "markdown-it";
 
 const Markdown = new markdownit({html: true});
 
@@ -18,15 +21,18 @@ function md(strings) {
   return template.content.cloneNode(true);
 }
 
+
 //VERIFY MUTABLE
 //mutable nameOfThing = undefined
 const nameOfThing = Mutable(undefined)
 
-const newName = view(Inputs.text({
+//const newName = view(Inputs.text({
+const newName = Inputs.text({
   label: "please enter the name of the thing to create",
   submit: true,
   minlength: 1
-}))
+})
+//}))
 
 //MUTABLE HERE LIKELY HITTING ERRORS
 //NEED NEW SETTER
@@ -39,7 +45,7 @@ const sideEffect = async function* (newName) {
   yield md`<mark>updated!!!`;
 }
 
-function viewroutine(generator) {
+export function viewroutine(generator) {
   let current;
   const holder = Object.defineProperty(
     document.createElement("span"),
@@ -72,7 +78,7 @@ function viewroutine(generator) {
   return holder;
 }
 
-async function* ask(input) {
+export async function* ask(input) {
   let responder = null;
   const response = new Promise(resolve => (responder = resolve));
   input.addEventListener('input', () => responder(input.value));
@@ -80,7 +86,8 @@ async function* ask(input) {
   return await response;
 }
 
-const example1 = view(viewroutine(async function*() {
+//const example1 = view(viewroutine(async function*() {
+const example1 = viewroutine(async function*() {
   let newName = undefined;
   while (true) {
     newName = yield* ask(
@@ -95,15 +102,18 @@ const example1 = view(viewroutine(async function*() {
     await new Promise(r => setTimeout(r, 1000)); // Mock async action
     yield* ask(htl.html`${md`<mark>updated`} ${Inputs.button("Again?")}`);
   }
-}))
+  })
+//}))
 
-const choice = view(viewroutine(async function*() {
-  while (true) {
+//const choice = view(viewroutine(async function*() {
+const choice = viewroutine(async function*() {
+while (true) {
     const choice = yield* choose();
     if (choice == 'square') yield* flashSquare();
     if (choice == 'star') yield* flashStar();
   }
-}))
+})
+//}))
 
 async function* choose() {
   let resolve;

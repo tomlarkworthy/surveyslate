@@ -1,3 +1,5 @@
+import { Generators } from "observablehq:stdlib";
+
 export const hash = Generators.observe(notify => {
   const hashchange = () => notify(location.hash);
   hashchange();

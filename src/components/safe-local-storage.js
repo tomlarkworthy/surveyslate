@@ -1,15 +1,3 @@
-export const localStorage = (() => {
-  try {
-    const storage = window.localStorage;
-    const key = "__storage_test__";
-    storage.setItem(key, key);
-    storage.removeItem(key);
-    return storage;
-  } catch (error) {
-    return new MemoryStorage();
-  }
-})();
-
 export class MemoryStorage {
   constructor() {
     Object.defineProperties(this, { _: { value: new Map() } });
@@ -33,3 +21,15 @@ export class MemoryStorage {
     this._.clear();
   }
 }
+
+export const localStorage = (() => {
+  try {
+    const storage = window.localStorage;
+    const key = "__storage_test__";
+    storage.setItem(key, key);
+    storage.removeItem(key);
+    return storage;
+  } catch (error) {
+    return new MemoryStorage();
+  }
+})();

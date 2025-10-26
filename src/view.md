@@ -1,4 +1,4 @@
-# Composing viewofs with the _view_ literal
+# Composing viewofs with the _viewUI_ literal
 
 <!--NOTE: This is a complex notebook to convert. -->
 
@@ -26,13 +26,13 @@ function md(strings) {
 ```
 
 
-Lets make custom UIs on Observable _easy_ by composing views.
+Lets make custom UIs on Observable _easy_ by composing viewUIs.
 
-We wrap the amazing [hypertext literal](https://observablehq.com/@observablehq/htl) with a interceptor that looks for _[key, view]_ arguments. It uses the key to determine what field to map the view's value to in the container.
+We wrap the amazing [hypertext literal](https://observablehq.com/@observablehq/htl) with a interceptor that looks for _[key, viewUI]_ arguments. It uses the key to determine what field to map the viewUI's value to in the container.
 
       ```
       ~~~js
-      viewof container = view\`<div>
+      viewof container = viewUI\`<div>
         \${["child1", Inputs.text()]}
         \${["child2", Inputs.range()]}\`
       ~~~
@@ -40,17 +40,17 @@ We wrap the amazing [hypertext literal](https://observablehq.com/@observablehq/h
 
 The syntax of a 2 element array is inspired by [Object.entries(...)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/entries).
 
-By reusing the [hypertext literal](https://observablehq.com/@observablehq/htl) you are able to build your custom ui view using HTML, the best abstraction for layout. Because _view_ itself is a viewof, finally, we can hierarchically build up custom views from standard library views like [@observablehq/inputs](https://observablehq.com/@observablehq/inputs)
+By reusing the [hypertext literal](https://observablehq.com/@observablehq/htl) you are able to build your custom ui viewUI using HTML, the best abstraction for layout. Because _viewUI_ itself is a viewof, finally, we can hierarchically build up custom viewUIs from standard library viewUIs like [@observablehq/inputs](https://observablehq.com/@observablehq/inputs)
 
       ```
       ~~~js
-          import {view} from '@tomlarkworthy/view'
+          import {viewUI} from '@tomlarkworthy/viewUI'
       ~~~
       ````
 
-#### How to use the view-literal in UI development
+#### How to use the viewUI-literal in UI development
 
-There is a substantial guide to [scaling UI development](https://observablehq.com/@tomlarkworthy/ui-development) which uses on this view literal quite heavily, and also has some weighty examples than the reference documentation here.
+There is a substantial guide to [scaling UI development](https://observablehq.com/@tomlarkworthy/ui-development) which uses on this viewUI literal quite heavily, and also has some weighty examples than the reference documentation here.
 
 
 
@@ -59,8 +59,17 @@ Known Issues:
 - https://observablehq.com/@tomlarkworthy/dynamic-controls-example cannot bind to arrayView (DocumentFragment does not emit events)
 
 ```js
-toc()
+//toc()
 ```
+
+```js
+const document_toc = toc({
+  headers: "h2,h3",
+})
+```
+
+${document_toc}
+
 
 ## Change log
 
@@ -81,7 +90,7 @@ The original need for a UI composition helper was noted by [@mootari](/@mootari)
 #### Demo
 
 ```js echo
-const composite = view`<div style="display: flex; justify-content:space-between; ">
+const compositeView = viewUI`<div style="display: flex; justify-content:space-between; ">
 <div style="display: flex-column;">
   <div>${["r1", Inputs.range([0, 10])]}</div>
   <div>${["r2", Inputs.range([0, 3])]}</div>
@@ -97,6 +106,26 @@ const composite = view`<div style="display: flex; justify-content:space-between;
 `
 ```
 
+```js echo
+const composite = Generators.input(compositeView)
+```
+
+```js echo
+compositeView
+```
+
+```js echo
+display(compositeView.value)
+```
+
+
+```js echo
+composite
+```
+
+
+
+
 ## Back-writable
 
 You can write the values back into the component by setting 'value'. This works for sub-components too, as long as everything is following [reusability guidlines](https://observablehq.com/@tomlarkworthy/ui-linter).
@@ -106,7 +135,8 @@ You can write the values back into the component by setting 'value'. This works 
 ```js echo
 htl.html`<button onclick=${() => {
 //  viewof composite.value = {
-  composite.value = {
+//  composite.value = {
+    compositeView.value = {
     r1: Math.random() * 10,
     r2: Math.random() * 3,
     text: `${Math.random()}`
@@ -117,17 +147,33 @@ htl.html`<button onclick=${() => {
 
 ## Singletons
 
-  Sometimes you want to just wrap an existing view with some HTML. Use the spread operators for this
+  Sometimes you want to just wrap an existing viewUI with some HTML. Use the spread operators for this
 
 
 ```js echo
-// NOTE:  We need to reconcile this with how views work in Framework
-const singleton = view(view`<div><h4>My control</h4>${['...', Inputs.range()]}`)
+// NOTE:  We need to reconcile this with how viewUIs work in Framework
+const singletonView = viewUI`<div><h4>My control</h4>${['...', Inputs.range()]}`
+```
+
+```js
+const singleton = Generators.input(singletonView)
+```
+
+
+```js echo
+singletonView
 ```
 
 ```js echo
 singleton
 ```
+
+
+```js echo
+// Note that here and for the inputs that follow, we need to establish the use of the Generator.input, otherwise the value isn't dynamic.
+singletonView.value
+```
+
 
 ```js echo
 // viewof singleton
@@ -135,17 +181,38 @@ singleton
 
 ## Collections -- Arrays
 
-  You can bind an array of views to a single parameter with _\[string, ArrayOfViews]_. 
+  You can bind an array of viewUIs to a single parameter with _\[string, ArrayOfViews]_. 
 
-If you supply a third argument, a build function of _data => view_ the list can be dynamically resized  _\[label, ArrayOfViews, (data) => view]_
+If you supply a third argument, a build function of _data => viewUI_ the list can be dynamically resized  _\[label, ArrayOfViews, (data) => viewUI]_
 
 
 ```js echo
-// This was defined as a view in the original notebook.
-const arrayCollection = view(view`<div>${[
+// When I attempt to use Framework's view() function here, the inputs will display but they do not dynamically change when I press the 'Add a slider' button.
+// When I do not use Framework's view function, the cell with just `arrayfunction` will display the Inputs, and they will react to the 'Add a slider' button, however I can no longer see the values for `arrayCollection.elements` and I don't see the output 'Object {elements: Array(5)}' in the same way that I see it in the notebook.
+// I can, however, see the values using `arrayCollection.value`.
+// After I introduce Generators.input, I cannot add a new input.
+// Fixed by pointing to arrayCollectionView.view
+
+
+// This used viewof in the original notebook.
+//viewof arrayCollection = viewUI`<div>${[
+const arrayCollectionView = viewUI`<div>${[
   "elements",
   Array.from({ length: 5 }, () => Inputs.range())
-]}`)
+]}`
+```
+
+```js
+const arrayCollection = Generators.input(arrayCollectionView)
+```
+
+
+```js echo
+arrayCollectionView
+```
+
+```js echo
+arrayCollection
 ```
 
 ```js echo
@@ -155,13 +222,18 @@ arrayCollection.elements
 Array bindings are mutable, you can write DOM components to the viewof layer
 
 ```js echo
-// This needs to be reconciled with how views work in Framework.
+// This needs to be reconciled with how viewUI and Generators.input work in Framework.
+// Currently I am unable to write new sliders here.
+
+
 Inputs.button("Add a slider", {
   reduce: () => {
     //viewof arrayCollection.elements = [
-    arrayCollection.elements = [
+    arrayCollectionView.elements = [
+    //arrayCollection.value.elements = [
     //  ...viewof arrayCollection.elements,
-      ...arrayCollection.elements,
+      ...arrayCollectionView.elements,
+    //  ...arrayCollection.value.elements,
       Inputs.range() // Add another viewof
     ];
     // dispatch the input event so dataflow gets updated
@@ -171,35 +243,73 @@ Inputs.button("Add a slider", {
 })
 ```
 
-```js echo
-arrayCollection.elements
+```js
+//display(arrayCollection.elements)
 ```
 
-```js
-arrayCollection
+```js echo
+// As above and also below, we need to establish the use of the Generator.input, otherwise the value isn't dynamic.
+// Note that this changes to undefined after introducing Generators.input
+arrayCollection.value
 ```
+
+```js echo
+arrayCollectionView.value
+```
+
+```js echo
+arrayCollectionView.value.elements
+```
+
 
 ### Dynamic Arrays
 
-If you provide a rowBuilder function as the third argument the view will build new UI elements in response to reassignments at the data layer. It's decribed in detail in [@tomlarkworthy/ui-development#dynamic_lists](https://observablehq.com/@tomlarkworthy/ui-development#dynamic_lists)
+If you provide a rowBuilder function as the third argument the viewUI will build new UI elements in response to reassignments at the data layer. It's decribed in detail in [@tomlarkworthy/ui-development#dynamic_lists](https://observablehq.com/@tomlarkworthy/ui-development#dynamic_lists)
 
 
 ```js echo
-// viewof dynamicArrayCollection = view`<div>${[
-const dynamicArrayCollection = view(view`<div>${[
+// viewof dynamicArrayCollection = viewUI`<div>${[
+const dynamicArrayCollectionView = viewUI`<div>${[
   'elements',
   [],
   val => Inputs.range([0, 1], { value: val }) // rowBuilder
-]}`)
+]}`
 ```
+
+
+```js
+const dynamicArrayCollection = Generators.input(dynamicArrayCollectionView)
+```
+
+
+```js echo
+dynamicArrayCollectionView
+```
+
+
+
+```js echo
+dynamicArrayCollection
+```
+
+
+```js echo
+// As already flagged, we need to establish the use of the Generator.input, otherwise the value isn't dynamic.
+dynamicArrayCollection.value
+```
+
+```js
+dynamicArrayCollection.value
+```
+
 
 ```js echo
 Inputs.button("Add a slider", {
   reduce: () => {
-    dynamicArrayCollection.elements.push(Math.random());
+    dynamicArrayCollectionView.value.elements.push(Math.random());
     // dispatch the input event so dataflow gets updated
     //viewof dynamicArrayCollection.elements.dispatchEvent(new Event("input"));
-    dynamicArrayCollection.elements.dispatchEvent(new Event("input"));
+    dynamicArrayCollectionView.value.elements.dispatchEvent(new Event("input"));
   }
 })
 ```
@@ -207,50 +317,88 @@ Inputs.button("Add a slider", {
 ```js echo
 Inputs.button("Remove a slider", {
   reduce: () => {
-    dynamicArrayCollection.elements.pop();
+    dynamicArrayCollectionView.value.elements.pop();
     // dispatch the input event so dataflow gets updated
     //viewof dynamicArrayCollection.elements.dispatchEvent(new Event("input"));
-    dynamicArrayCollection.elements.dispatchEvent(new Event("input"));
+    dynamicArrayCollectionView.value.elements.dispatchEvent(new Event("input"));
   }
 })
 ```
 
 ```js
-const objects = md`## Collections -- Objects
-
-  You can bind an object of [string, view] to many parameters with the special spread key '_..._'
-
-`
+//const objects = md`## Collections -- Objects
+//
+//  You can bind an object of [string, viewUI] to many parameters with the special spread key '_..._'
+//
+//`
 ```
 
+## Collections -- Objects
+
+You can bind an object of [string, viewUI] to many parameters with the special spread key '_..._'
+
 ```js echo
-// viewof objectCollection = view`${[
-const objectCollection = view(view`${[
+// viewof objectCollection = viewUI`${[
+const objectCollectionView = viewUI`${[
   '...',
   {
     number: Inputs.range(),
     text: Inputs.text()
   }
-]}`)
+]}`
 ```
+
+
+```js
+const objectCollection = Generators.input(objectCollectionView)
+```
+
+
+```js echo
+objectCollectionView
+```
+
 
 ```js echo
 objectCollection
 ```
 
-### Dynamic Objects
 
-If you supply a view builder, _(data) => view_ as the third argument, you can dynamically add and remove entries to your view by assigning the a whole new object.
+```js echo
+// Again, we need to establish the use of the Generator.input, otherwise the value isn't dynamic.
+objectCollection.value
+```
 
 
 ```js echo
-// viewof dynamicObjectCollection = view`<div>${[
-const dynamicObjectCollection = view(view`<div>${[
+objectCollectionView.value
+```
+
+
+### Dynamic Objects
+
+If you supply a viewUI builder, _(data) => viewUI_ as the third argument, you can dynamically add and remove entries to your viewUI by assigning the a whole new object.
+
+
+```js echo
+// viewof dynamicObjectCollection = viewUI`<div>${[
+const dynamicObjectCollectionView = viewUI`<div>${[
   '...',
   {},
   txt => Inputs.text({ value: txt })
-]}`)
+]}`
 ```
+
+
+```js
+const dynamicObjectCollection = Generators.input(dynamicObjectCollectionView)
+```
+
+
+```js echo
+dynamicObjectCollectionView
+```
+
 
 ```js echo
 dynamicObjectCollection
@@ -264,11 +412,14 @@ dynamicObjectCollection
 Inputs.button("Pick one of three keys and randomize their value", {
   reduce: () => {
     const key = "k" + Math.floor(Math.random() * 3);
-    viewof dynamicObjectCollection.value = {
-      ...viewof dynamicObjectCollection.value,
+   // viewof dynamicObjectCollection.value = {
+       dynamicObjectCollectionView.value = {
+//      ...viewof dynamicObjectCollection.value,
+      ...dynamicObjectCollectionView.value,
       [key]: key + " " + Math.random()
     };
-    viewof dynamicObjectCollection.dispatchEvent(new Event('input', {bubbles: true}))
+//    viewof dynamicObjectCollection.dispatchEvent(new Event('input', {bubbles: true}))
+    dynamicObjectCollectionView.dispatchEvent(new Event('input', {bubbles: true}))
   }
 })
 ```
@@ -277,13 +428,13 @@ Inputs.button("Pick one of three keys and randomize their value", {
 Inputs.button("Delete a random key", {
   reduce: () => {
     //const copy = { ...viewof dynamicObjectCollection.value };
-    const copy = { ...dynamicObjectCollection.value };
+    const copy = { ...dynamicObjectCollectionView.value };
     const key = "k" + Math.floor(Math.random() * 3);
     delete copy[key];
     //viewof dynamicObjectCollection.value = copy;
-    dynamicObjectCollection.value = copy;
+    dynamicObjectCollectionView.value = copy;
     //viewof dynamicObjectCollection.dispatchEvent(
-    dynamicObjectCollection.dispatchEvent(
+    dynamicObjectCollectionView.dispatchEvent(
 
       new Event('input', { bubbles: true })
     );
@@ -292,25 +443,50 @@ Inputs.button("Delete a random key", {
 ```
 
 ```js echo
-//viewof dynamicObjectCollection.value
-dynamicObjectCollection.value
+dynamicObjectCollectionView.value
 ```
 
-## Hidden views
+```js echo
+//viewof dynamicObjectCollection.value
+dynamicObjectCollection.value
 
-  If you wish to bind a value to the view but not add it to the DOM, prefix the label with "_". This can be useful for bringing another view's value into the model without pruning its currently location.
+// Wile the notebook use of .value here is a bit different than the above, its the same concept - we need to establish the use of the Generator.input, otherwise the value isn't dynamic.
+```
+
+## Hidden viewUIs
+
+If you wish to bind a value to the viewUI but not add it to the DOM, prefix the label with "_". This can be useful for bringing another viewUI's value into the model without pruning its currently location.
 
 known issues: does not work well with singletons.|
 
 
 ```js echo
-//viewof hiddenView = view`<div><h4>My hidden control</h4>${[
-const hiddenView = view(view`<div><h4>My hidden control</h4>${[
+//viewof hiddenView = viewUI`<div><h4>My hidden control</h4>${[
+const hiddenViewView = viewUI`<div><h4>My hidden control</h4>${[
   '_hidden',
 //  viewof singleton
 singleton
 
-]}`)
+]}`
+```
+
+
+```js
+const hiddenView = Generators.input(hiddenViewView)
+```
+
+
+```js echo
+hiddenView
+```
+
+
+```js echo
+hiddenViewView.hidden
+```
+
+```js echo
+hiddenViewView.hidden = 0.60
 ```
 
 ```js echo
@@ -334,9 +510,9 @@ You might not want changes to propagate immediately. For this usecase wrap with 
 By default it wraps the inner node with a SPAN. This is usually the safest thing to do but not always, you can turn off this behaviour with the option _nospan: false_. Note: this will use the topmost node to hold the value.
 
 
-```js
+```js echo
 function cautious(
-  /* (apply, reset) => view */ viewBuilder,
+  /* (apply, reset) => viewUI */ viewUIBuilder,
   { nospan = false } = {}
 ) {
   const apply = DOM.uid().id;
@@ -377,7 +553,7 @@ function cautious(
   }
 
   return wrapper(
-    inputFilter(viewBuilder(trigger(apply), trigger(reset)), {
+    inputFilter(viewUIBuilder(trigger(apply), trigger(reset)), {
       filter: (e) => e.detail === apply || e.detail === reset || !e.isTrusted
     })
   );
@@ -386,17 +562,23 @@ function cautious(
 
 #### Cautious demo
 
+
+```js echo
+cautiousNestedDemoView
+```
+
+
 ```js echo
 cautiousNestedDemo
 ```
 
 ```js echo
-//viewof cautiousNestedDemo = view`
-const cautiousNestedDemo = view(view`
+//viewof cautiousNestedDemo = viewUI`
+const cautiousNestedDemoView = viewUI`
   ${[
     "c1",
     cautious(
-      (apply, reset) => view`<div>
+      (apply, reset) => viewUI`<div>
         ${['foo', Inputs.range([0, 100], { label: 'Foo', step: 1 })]}
         ${['bar', Inputs.text({ value: 'change me', label: 'Bar' })]}
         <hr style="margin:0;padding:10px;max-width:360px">
@@ -407,7 +589,7 @@ const cautiousNestedDemo = view(view`
   ${[
     "c2",
     cautious(
-      (apply, reset) => view`<div>
+      (apply, reset) => viewUI`<div>
         ${['baz', Inputs.range([0, 100], { label: 'Baz', step: 1 })]}
         ${['bat', Inputs.text({ value: 'change me', label: 'Bat' })]}
         <hr style="margin:0;padding:10px;max-width:360px">
@@ -415,13 +597,20 @@ const cautiousNestedDemo = view(view`
         <button onclick=${reset}>Reset</button>`
     )
   ]}
-
-`)
+`
 ```
+
+
+```js
+const cautiousNestedDemo = Generators.input(cautiousNestedDemoView)
+```
+
+
+
 
 ### bindOneWay
 
-As views become composite heirarchies, its useful to transform their values as you connect their parts unidirectionally.
+As viewUIs become composite heirarchies, its useful to transform their values as you connect their parts unidirectionally.
 
 _bindOneWay(target, source, transform, options)_ is a *one-way* bind between event sources, that returns the target. _options_ keys include: _invalidation_, and _transform_.
 
@@ -430,35 +619,75 @@ Transform allows you to alter the data as it passed between from source to targe
 The signature follows Observables precedence (https://github.com/observablehq/inputs#bind)
 
 
-```js
+```js echo
 //viewof slider = Inputs.range([0, 10], { value: 0, label: "Try increasing me" })
-const slider = view(Inputs.range([0, 10], { value: 0, label: "Try increasing me" }))
+const sliderElement = Inputs.range([0, 10], { value: 0, label: "Try increasing me" })
+```
+
+```js echo
+const slider = Generators.input(sliderElement)
+```
+
+```js echo
+display(sliderElement)
+```
+
+```js echo
+display(slider)
 ```
 
 ```js echo
 //viewof levels = bindOneWay(
-const levels = view(bindOneWay(
+const levelsElement = bindOneWay(
   Inputs.radio(["0", "low", "high"], { disabled: true }),
 //  viewof slider,
-slider,
+//  slider,
+sliderElement,
   {
     transform: v => (v === 0 ? "0" : v < 5 ? "low" : "high")
   }
-))
+)
+```
+
+
+```js echo
+const levels = Generators.input(levelsElement)
+```
+
+```js echo
+display(levelsElement)
+```
+
+```js echo
+display(levels)
 ```
 
 ```js echo
 //viewof levelsText = bindOneWay(Inputs.text({ disabled: true }), viewof levels, {
-const levelsText = view(bindOneWay(Inputs.text({ disabled: true }), 
+const levelsTextElement = bindOneWay(Inputs.text({ disabled: true }), 
 //viewof levels, {
-levels, {
+//levels, {
+levelsElement, {
   transform: l => `The level is ${l}`
-}))
+})
+```
+
+
+```js echo
+const levelsText = Generators.input(levelsTextElement)
+```
+
+```js echo
+display(levelsTextElement)
+```
+
+```js echo
+display(levelsText)
 ```
 
 ```js echo
 // Copied from https://github.com/observablehq/inputs/blob/main/src/bind.js
-const bindOneWay = () =>{
+const bindOneWay = (() => {
   function disposal(element) {
     return new Promise((resolve) => {
       requestAnimationFrame(() => {
@@ -543,21 +772,18 @@ const bindOneWay = () =>{
       }
     }
   };
-}
+})()
 ```
 
-```js
-md`### variable
+### variable
 
-Variables allow you to add additional degrees of freedom to a component as normal views. They have an contained 'value', and they can be bind to.
+Variables allow you to add additional degrees of freedom to a component as normal viewUIs. They have an contained 'value', and they can be bind to.
 
 
-The contract of Observable states changes to a view's value should update visual appearance **but not cascade**, whereas if an _'input'_ events is dispatch the cell should cascade Dataflow. Thus a variable defines an additional event type 'assign' which is emmitted whenever the variable is assigned. This is so you can hook variables being assigned to and make DOM manipulations without causing a dataflow cascade.
+The contract of Observable states changes to a viewUI's value should update visual appearance **but not cascade**, whereas if an _'input'_ events is dispatch the cell should cascade Dataflow. Thus a variable defines an additional event type 'assign' which is emmitted whenever the variable is assigned. This is so you can hook variables being assigned to and make DOM manipulations without causing a dataflow cascade.
 
-The toString of variable is a coercion of the value, so a variable as a view can be placed in attribute nodes etc.
+The toString of variable is a coercion of the value, so a variable as a viewUI can be placed in attribute nodes etc.
 
-`
-```
 
 ```js echo
 function variable(value, { name = "variable" } = {}) {
@@ -575,42 +801,50 @@ function variable(value, { name = "variable" } = {}) {
       value: () => `${value}`
     }
   });
-}
+};
 ```
 
 ```js echo
-const exmple_variable = variable(5)
+const example_variable = variable(5);
 ```
 
 ```js echo
-(exmple_variable.value = 44)
+example_variable
 ```
 
 ```js echo
-{
+(example_variable.value = 44)
+```
+
+```js echo
+// NOTE: This doesn't appear to be configured correctly
+const variableGen = (async function* () {
   let resolve = null;
-  exmple_variable.addEventListener('assign', evt => resolve(evt.detail));
+  example_variable.addEventListener('assign', evt => resolve(evt.detail));
   while (true) {
     yield new Promise(r => (resolve = r));
   }
-}
+})()
 ```
 
-```js
-md`## Code
+```js echo
+variableGen
+```
+
+
+## Code
 
 Most of the work is done by _htl_, we are simply adding a new _[key, HTML]_ case
-`
-```
+
 
 ```js
-function view(strings, ...exprs) {
+function viewUI(strings, ...exprs) {
   return wrap(htl.html, strings, ...exprs);
 }
 ```
 
 ```js
-function viewSvg(strings, ...exprs) {
+function viewUISvg(strings, ...exprs) {
   return wrap(htl.svg, strings, ...exprs);
 }
 ```
@@ -620,7 +854,7 @@ function wrap(fn, strings, ...exprs) {
   let singleton = undefined;
   let start = undefined; // To know where to start dynamic objects
   let builder = undefined; // For new keys are added dynamically
-  const views = {};
+  const viewUIs = {};
 
   const pexpr = exprs.map((exp) => {
     // All special functions are [key, ...]
@@ -641,7 +875,7 @@ function wrap(fn, strings, ...exprs) {
         singleton = exp[1];
       } else {
         // look for [key, HTML] entries
-        views[key] = exp[1];
+        viewUIs[key] = exp[1];
       }
       presentation = exp[1];
     } else if (
@@ -662,7 +896,7 @@ function wrap(fn, strings, ...exprs) {
         name: key,
         initial: exp[1]
       });
-      views[key] = presentation;
+      viewUIs[key] = presentation;
     } else if (
       // ARRAY PASSED IN (WITH BUILDER)
       exp.length === 3 &&
@@ -684,7 +918,7 @@ function wrap(fn, strings, ...exprs) {
         initial: exp[1],
         builder: exp[2]
       });
-      views[key] = presentation;
+      viewUIs[key] = presentation;
     } else if (
       // SPREAD OBJECT (NO BUILDER)
       exp.length === 2 &&
@@ -693,7 +927,7 @@ function wrap(fn, strings, ...exprs) {
       Object.keys(exp[1]).every((e) => typeof e === "string") &&
       Object.values(exp[1]).every((e) => e instanceof EventTarget)
     ) {
-      Object.entries(exp[1]).forEach((e) => (views[e[0]] = e[1]));
+      Object.entries(exp[1]).forEach((e) => (viewUIs[e[0]] = e[1]));
       presentation = Object.values(exp[1]);
     } else if (
       // SPREAD OBJECT (WITH BUILDER)
@@ -704,7 +938,7 @@ function wrap(fn, strings, ...exprs) {
       Object.values(exp[1]).every((e) => e instanceof EventTarget) &&
       typeof exp[2] === "function"
     ) {
-      Object.entries(exp[1]).forEach((e) => (views[e[0]] = e[1]));
+      Object.entries(exp[1]).forEach((e) => (viewUIs[e[0]] = e[1]));
       start = document.createComment(key);
       builder = exp[2];
       presentation = [start, ...Object.values(exp[1])];
@@ -738,11 +972,11 @@ function wrap(fn, strings, ...exprs) {
   const self = fn(strings, ...pexpr);
 
   if (singleton) {
-    if (Object.keys(views).length !== 0)
+    if (Object.keys(viewUIs).length !== 0)
       throw new Error("Singleton defined but additional properties supplied");
 
-    // Users are expected to call dispatchEvent on view, so the inner singleton
-    // need to know about these events for the view to work
+    // Users are expected to call dispatchEvent on viewUI, so the inner singleton
+    // need to know about these events for the viewUI to work
     // => events need to be copied over, if originating from here
     self.addEventListener("input", (evt) => {
       if (evt.target === self) {
@@ -769,10 +1003,10 @@ function wrap(fn, strings, ...exprs) {
       get() {
         return Object.defineProperties(
           {},
-          Object.keys(views).reduce((acc, key) => {
+          Object.keys(viewUIs).reduce((acc, key) => {
             acc[key] = {
-              get: () => views[key].value,
-              set: (v) => (views[key].value = v),
+              get: () => viewUIs[key].value,
+              set: (v) => (viewUIs[key].value = v),
               enumerable: true
             };
             return acc;
@@ -781,13 +1015,13 @@ function wrap(fn, strings, ...exprs) {
       },
       set(newValues) {
         Object.entries(newValues).forEach(([key, newValue]) => {
-          if (views[key]) {
-            views[key].value = newValue; // Update of existing child value
+          if (viewUIs[key]) {
+            viewUIs[key].value = newValue; // Update of existing child value
           } else if (start && builder) {
             // Adding a new key
             const parent = start.parentNode;
             const newView = builder(newValue);
-            views[key] = newView;
+            viewUIs[key] = newView;
             parent.appendChild(newView);
             // Add top level entry too
             Object.defineProperty(self, key, {
@@ -799,11 +1033,11 @@ function wrap(fn, strings, ...exprs) {
         });
 
         // If we are a dynamic Object, we need to remove keys too
-        Object.entries(views).forEach(([key, oldValue]) => {
+        Object.entries(viewUIs).forEach(([key, oldValue]) => {
           if (!newValues.hasOwnProperty(key)) {
             // It needs to go
-            const oldView = views[key];
-            delete views[key];
+            const oldView = viewUIs[key];
+            delete viewUIs[key];
             if (oldView.remove) oldView.remove();
             delete self[key];
           }
@@ -811,14 +1045,14 @@ function wrap(fn, strings, ...exprs) {
       },
       configurable: true
     },
-    ...Object.keys(views).reduce(
-      // Add top level field to access the subviews in the parent viewof
+    ...Object.keys(viewUIs).reduce(
+      // Add top level field to access the subviewUIs in the parent viewof
       (acc, key) => {
         acc[key] = {
-          get: () => views[key],
+          get: () => viewUIs[key],
           set: (newView) => {
-            const oldView = views[key];
-            delete views[key];
+            const oldView = viewUIs[key];
+            delete viewUIs[key];
             if (oldView.remove) oldView.remove();
 
             // assigning an arrayView (special cased)
@@ -829,7 +1063,7 @@ function wrap(fn, strings, ...exprs) {
               });
             }
 
-            views[key] = newView;
+            viewUIs[key] = newView;
             if (newView instanceof Node) self.appendChild(newView);
           },
           enumerable: true,
@@ -845,13 +1079,13 @@ function wrap(fn, strings, ...exprs) {
 
 ### arrayView
 
-arrayView is a DocumentFragment whose nodes are subviews organised in an array. It is initialized with a *builder* of which is a function from data to a subview. E.g. `(str) => Inputs.text({value: str})`, and it can be initialised with a set of views.
+arrayView is a DocumentFragment whose nodes are subviewUIs organised in an array. It is initialized with a *builder* of which is a function from data to a subviewUI. E.g. `(str) => Inputs.text({value: str})`, and it can be initialised with a set of viewUIs.
 
-Its presentation layer is a DocumentFragment, but with added array like behaviour so subviews are indexable like an array.
+Its presentation layer is a DocumentFragment, but with added array like behaviour so subviewUIs are indexable like an array.
 
 Its data object is an array, whose in-place methods (splice, push, pop, shift, unshift) are mirrored to DOM manipulation.
 
-So assigning a new data array *e.g.* `view.value = [...]`, will replace the whole DOM. Pushing an element on an array will insert a single DOM *e.g.* `view.push(...)` using the *builder* to make the new DOM element. By preferring in-place manipulations you can create efficient UIs that minimize DOM manipulations.
+So assigning a new data array *e.g.* `viewUI.value = [...]`, will replace the whole DOM. Pushing an element on an array will insert a single DOM *e.g.* `viewUI.push(...)` using the *builder* to make the new DOM element. By preferring in-place manipulations you can create efficient UIs that minimize DOM manipulations.
 
 <mark>
 todo
@@ -872,31 +1106,31 @@ function arrayView({
 
   const frag = new DocumentFragment();
 
-  const subviewToFragmentEventCloner = (e) => {
+  const subviewUIToFragmentEventCloner = (e) => {
     const new_e = new e.constructor(e.type, e);
     frag.dispatchEvent(new_e);
   };
 
   const _builder = builder
     ? (arg) => {
-        const subview = builder(arg);
-        subview.addEventListener("input", subviewToFragmentEventCloner);
-        return subview;
+        const subviewUI = builder(arg);
+        subviewUI.addEventListener("input", subviewUIToFragmentEventCloner);
+        return subviewUI;
       }
     : undefined;
 
-  const unbuilder = (subview) => {
-    subview.removeEventListener("input", subviewToFragmentEventCloner);
+  const unbuilder = (subviewUI) => {
+    subviewUI.removeEventListener("input", subviewUIToFragmentEventCloner);
   };
 
-  initial.forEach((subview) =>
-    subview.addEventListener("input", subviewToFragmentEventCloner)
+  initial.forEach((subviewUI) =>
+    subviewUI.addEventListener("input", subviewUIToFragmentEventCloner)
   );
 
   const start = document.createComment("START:" + name);
   const end = document.createComment("END:" + name);
-  let subviews = (_builder ? value.map(_builder) : []).concat(initial);
-  frag.append(...[start, ...subviews, end]);
+  let subviewUIs = (_builder ? value.map(_builder) : []).concat(initial);
+  frag.append(...[start, ...subviewUIs, end]);
 
   frag.addEventListener("input", (e) => {
     // https://stackoverflow.com/questions/11974262/how-to-clone-or-re-dispatch-dom-events
@@ -905,7 +1139,7 @@ function arrayView({
   });
 
   const getIndexProperty = (index) => ({
-    get: () => subviews[index],
+    get: () => subviewUIs[index],
     enumerable: true,
     configurable: true
   });
@@ -917,10 +1151,10 @@ function arrayView({
     // sync the splice with the DOM
     let node = start;
     // Forward to begining of the splice
-    for (let i = 0; i < startIndex && i < subviews.length; i++)
+    for (let i = 0; i < startIndex && i < subviewUIs.length; i++)
       node = node.nextSibling;
     // delete 'deleteCount' times
-    for (let i = 0; i < deleteCount && i < subviews.length; i++) {
+    for (let i = 0; i < deleteCount && i < subviewUIs.length; i++) {
       const toDelete = node.nextSibling;
       removedData.push(toDelete.value);
       unbuilder(toDelete);
@@ -929,16 +1163,16 @@ function arrayView({
     // add additional items
     const itemViews = [];
     for (let i = items.length - 1; i >= 0; i--) {
-      const subview = _builder(items[i]);
+      const subviewUI = _builder(items[i]);
       Object.defineProperty(frag, i, getIndexProperty(i));
       let presentation =
-        subview instanceof HTMLElement ? subview : htl.html`${subview}`;
-      itemViews.unshift(subview);
+        subviewUI instanceof HTMLElement ? subviewUI : htl.html`${subviewUI}`;
+      itemViews.unshift(subviewUI);
       parent.insertBefore(presentation, node.nextSibling);
     }
 
     // Apply to cache
-    subviews.splice(startIndex, deleteCount, ...itemViews);
+    subviewUIs.splice(startIndex, deleteCount, ...itemViews);
     // Let flow upwards to array too
     return removedData;
   };
@@ -951,12 +1185,12 @@ function arrayView({
         return customSplice;
       } else if (prop === "push") {
         return (...elements) => {
-          customSplice(subviews.length, 0, ...elements);
-          return subviews.length;
+          customSplice(subviewUIs.length, 0, ...elements);
+          return subviewUIs.length;
         };
       } else if (prop === "pop") {
         return () => {
-          return customSplice(subviews.length - 1, 1)[0];
+          return customSplice(subviewUIs.length - 1, 1)[0];
         };
       } else if (prop === "shift") {
         return () => {
@@ -965,14 +1199,14 @@ function arrayView({
       } else if (prop === "unshift") {
         return (...elements) => {
           customSplice(0, 0, ...elements);
-          return subviews.length;
+          return subviewUIs.length;
         };
       }
       return Reflect.get(...args);
     },
     set(obj, prop, value) {
       if (!isNaN(+prop)) {
-        // we also need to set the view
+        // we also need to set the viewUI
         customSplice(+prop, 1, value);
       }
       return Reflect.set(...arguments);
@@ -984,7 +1218,7 @@ function arrayView({
     value: {
       get: () =>
         new Proxy(
-          subviews.map((sv) => sv.value),
+          subviewUIs.map((sv) => sv.value),
           dataArrayProxyHandler
         ),
       set: (newArray) => {
@@ -993,31 +1227,31 @@ function arrayView({
 
         if (builder) {
           // We should be true to the operation and tear of the DOM and then replace it.
-          subviews.forEach((sv) => (sv.remove ? sv.remove() : undefined));
-          subviews = vArr.map((data) => {
-            const subview = _builder(data);
+          subviewUIs.forEach((sv) => (sv.remove ? sv.remove() : undefined));
+          subviewUIs = vArr.map((data) => {
+            const subviewUI = _builder(data);
             let presentation =
-              subview instanceof HTMLElement ? subview : htl.html`${subview}`;
+              subviewUI instanceof HTMLElement ? subviewUI : htl.html`${subviewUI}`;
             parent.insertBefore(presentation, end);
-            return subview;
+            return subviewUI;
           });
         } else {
           // We have to work around the limitations and try to do the operation without
           // building, so this only can work if you are setting it to something smaller
           vArr.forEach((v, i) => {
-            if (i < subviews.length) {
-              subviews[i].value = v; // mutate inplace
+            if (i < subviewUIs.length) {
+              subviewUIs[i].value = v; // mutate inplace
             } else {
               let built = _builder(v); // append additional
-              subviews[i] = built;
+              subviewUIs[i] = built;
               if (!(built instanceof HTMLElement)) built = htl.html`${built}`;
               parent.appendChild(built);
             }
           });
 
-          for (var i = subviews.length - 1; i >= vArr.length; i--) {
+          for (var i = subviewUIs.length - 1; i >= vArr.length; i--) {
             // delete backwards
-            const deleted = subviews.pop();
+            const deleted = subviewUIs.pop();
             if (deleted.remove) deleted.remove();
           }
         }
@@ -1038,7 +1272,7 @@ function arrayView({
       }
     },
     length: {
-      get: () => subviews.length,
+      get: () => subviewUIs.length,
       enumerable: true,
       configurable: true
     },
@@ -1047,8 +1281,8 @@ function arrayView({
         let index = 0;
         return {
           next() {
-            if (index < subviews.length) {
-              let val = subviews[index];
+            if (index < subviewUIs.length) {
+              let val = subviewUIs[index];
               index++;
               return { value: val, done: false };
             } else return { done: true };
@@ -1056,7 +1290,7 @@ function arrayView({
         };
       }
     },
-    ...subviews.reduce((acc, sv, index) => {
+    ...subviewUIs.reduce((acc, sv, index) => {
       acc[index] = getIndexProperty(index);
       return acc;
     }, {})
@@ -1064,7 +1298,7 @@ function arrayView({
 }
 ```
 
-```js
+```js echo
 md`length: ${numbers.length} with elements: ${numbers.join(", ")}`
 ```
 
@@ -1130,14 +1364,14 @@ ${Inputs.button("shift", {
 ```
 
 ```js echo
-//viewof numbers = view`<table>
-const numbers = view(view`<table>
+//viewof numbers = viewUI`<table>
+const numbers = view(viewUI`<table>
   ${[
     "...",
     arrayView({
       value: [1, 2, 3, 4, 5, 6],
       builder: (number) =>
-        view`<tr><td>${["...", Inputs.number({ value: number })]}</td></tr>`
+        viewUI`<tr><td>${["...", Inputs.number({ value: number })]}</td></tr>`
     })
   ]}
 </table>`)
@@ -1154,14 +1388,14 @@ const arrayViewTests = view(testing.createSuite({
 ```js echo
 arrayViewTests.test("arrayView dispatchEvent bubbles to container", (done) => {
   const av = arrayView({ builder: (v) => Inputs.input(v) });
-  const container = view`<div>${av}`;
+  const container = viewUI`<div>${av}`;
   container.addEventListener("input", () => done());
   av.dispatchEvent(new Event("input", { bubbles: true }));
 })
 ```
 
 ```js echo
-arrayViewTests.test("arrayView subview events bubble to arrayView", (done) => {
+arrayViewTests.test("arrayView subviewUI events bubble to arrayView", (done) => {
   const av = arrayView({
     value: [1],
     builder: (v) => Inputs.input(v)
@@ -1288,7 +1522,7 @@ arrayViewTests.test("arrayView push", () => {
 ## [Optional] Tests
 
 ```js
-const RUN_TESTS = true // htl.html`<a href="">`.href.includes("@tomlarkworthy/view")
+const RUN_TESTS = true // htl.html`<a href="">`.href.includes("@tomlarkworthy/viewUI")
 ```
 
 ```js echo
@@ -1324,7 +1558,7 @@ const expect = testing.expect
 
 ```js echo
 suite.test("Singleton spread reads from delagate", async () => {
-  const v = view`<div>${["...", variable(1)]}`;
+  const v = viewUI`<div>${["...", variable(1)]}`;
   expect(v.value).toEqual(1);
 })
 ```
@@ -1332,7 +1566,7 @@ suite.test("Singleton spread reads from delagate", async () => {
 ```js echo
 suite.test("Singleton spread write propagates", async () => {
   const delegate = variable();
-  const v = view`<div>${["...", delegate]}`;
+  const v = viewUI`<div>${["...", delegate]}`;
   v.value = 4;
   expect(delegate.value).toEqual(4);
 })
@@ -1346,7 +1580,7 @@ suite.test(
     delegate.addEventListener("input", (evt) => {
       done();
     });
-    const v = view`<div>${["...", delegate]}`;
+    const v = viewUI`<div>${["...", delegate]}`;
     v.dispatchEvent(new Event("input"));
   }
 )
@@ -1355,7 +1589,7 @@ suite.test(
 ```js echo
 suite.test("Hidden write propagates upstream", async () => {
   const delegate = variable();
-  const v = view`<div>${["_hidden", delegate]}`;
+  const v = viewUI`<div>${["_hidden", delegate]}`;
   v.hidden.value = 4;
   expect(delegate.value).toEqual(4);
 })
@@ -1364,7 +1598,7 @@ suite.test("Hidden write propagates upstream", async () => {
 ```js echo
 suite.test("Hidden events propogate to self", async (done) => {
   const delegate = variable();
-  const v = view`<div>${["_hidden", delegate]}`;
+  const v = viewUI`<div>${["_hidden", delegate]}`;
   v.addEventListener("input", (evt) => {
     done();
   });
@@ -1377,7 +1611,7 @@ suite.test(
   "Hidden object collection member events propogate to self",
   async (done) => {
     const delegate = variable();
-    const v = view`<div>${["_...", { a: delegate }]}`;
+    const v = viewUI`<div>${["_...", { a: delegate }]}`;
     v.addEventListener("input", (evt) => {
       done();
     });
@@ -1388,7 +1622,7 @@ suite.test(
 
 ```js echo
 suite.test("Nested write on arrayView replaces presentation", async () => {
-  const v = view`<div>${["array", [html`<input id=nwoa1 value="foo">`]]}`;
+  const v = viewUI`<div>${["array", [html`<input id=nwoa1 value="foo">`]]}`;
   expect(v.querySelector("#nwoa1")).not.toBe(null);
   expect(v.querySelector("#nwoa2")).toBe(null);
   expect(v.array.value).toEqual(["foo"]);
@@ -1404,7 +1638,7 @@ suite.test("Nested write on arrayView replaces presentation", async () => {
 suite.test(
   "Composite write spreads to array subproperty (deletion)",
   async () => {
-    const v = view`<div>${["array", [Inputs.input()]]}`;
+    const v = viewUI`<div>${["array", [Inputs.input()]]}`;
     v.value = { array: [] };
     expect([...v.array]).toEqual([]);
     expect(v.value.array).toEqual([]);
@@ -1416,7 +1650,7 @@ suite.test(
 suite.test(
   "Composite write spreads to array subproperty (addition) (via destructuring assignment)",
   async () => {
-    const v = view`<div>${["array", [Inputs.input()], (v) => Inputs.input(v)]}`;
+    const v = viewUI`<div>${["array", [Inputs.input()], (v) => Inputs.input(v)]}`;
     v.value = { array: [1, 2] };
     expect(v.value.array).toEqual([1, 2]);
     expect(v.array).toContainEqual(Inputs.input(1));
@@ -1427,9 +1661,9 @@ suite.test(
 
 ```js echo
 suite.test(
-  "Composite write spreads to array subproperty (addition) (via view.value assignment)",
+  "Composite write spreads to array subproperty (addition) (via viewUI.value assignment)",
   async () => {
-    const v = view`<div>${["array", [Inputs.input()], (v) => Inputs.input(v)]}`;
+    const v = viewUI`<div>${["array", [Inputs.input()], (v) => Inputs.input(v)]}`;
     v.array.value = [1, 2]; // Should work but doesn't, we need some kind of ArrayView type
     expect(v.value.array).toEqual([1, 2]);
     expect(v.array).toContainEqual(Inputs.input(1));
@@ -1442,7 +1676,7 @@ suite.test(
 suite.test(
   "Composite write spreads to array subproperty (addition) (via data assignment)",
   async () => {
-    const v = view`<div>${["array", [Inputs.input()], (v) => Inputs.input(v)]}`;
+    const v = viewUI`<div>${["array", [Inputs.input()], (v) => Inputs.input(v)]}`;
     v.value.array = [1, 2];
     expect(v.value.array).toEqual([1, 2]);
     expect(v.array).toContainEqual(Inputs.input(1));
@@ -1453,7 +1687,7 @@ suite.test(
 
 ```js echo
 suite.test("Array get", async () => {
-  const v = view`<div>${["array", [Inputs.input(1)]]}`;
+  const v = viewUI`<div>${["array", [Inputs.input(1)]]}`;
   expect(v.value.array).toEqual([1]);
   expect(v.array[0]).toEqual(Inputs.input(1));
   expect([...v.array]).toEqual([Inputs.input(1)]);
@@ -1462,7 +1696,7 @@ suite.test("Array get", async () => {
 
 ```js echo
 suite.test("Array write with builder creates new elements", async () => {
-  const v = view`<div>${["array", [Inputs.input()], (v) => Inputs.input(v)]}`;
+  const v = viewUI`<div>${["array", [Inputs.input()], (v) => Inputs.input(v)]}`;
   v.value.array = [1, 2];
   expect(v.value.array).toEqual([1, 2]);
   expect(v.array).toContainEqual(Inputs.input(1));
@@ -1472,7 +1706,7 @@ suite.test("Array write with builder creates new elements", async () => {
 
 ```js echo
 suite.test("Array write remove elements", async () => {
-  const v = view`<div>${["array", [Inputs.input(0), Inputs.input(2)]]}`;
+  const v = viewUI`<div>${["array", [Inputs.input(0), Inputs.input(2)]]}`;
   v.value.array = [1];
   expect(v.value.array).toEqual([1]);
   expect(v.array).toContainEqual(Inputs.input(1));
@@ -1481,7 +1715,7 @@ suite.test("Array write remove elements", async () => {
 
 ```js echo
 suite.test("Array in-place splice support (delete), no builder", async () => {
-  const v = view`<div>${["array", [Inputs.input(0), Inputs.input(2)]]}`;
+  const v = viewUI`<div>${["array", [Inputs.input(0), Inputs.input(2)]]}`;
   v.value.array.splice(0, 1);
   expect(v.value.array).toEqual([2]);
 })
@@ -1489,7 +1723,7 @@ suite.test("Array in-place splice support (delete), no builder", async () => {
 
 ```js echo
 suite.test("Array in-place splice support (delete), with builder", async () => {
-  const v = view`<div>${[
+  const v = viewUI`<div>${[
     "array",
     [Inputs.input(0), Inputs.input(2)],
     (v) => Inputs.input(v)
@@ -1503,7 +1737,7 @@ suite.test("Array in-place splice support (delete), with builder", async () => {
 suite.test(
   "Array in-place splice support (addition) with builder",
   async () => {
-    const v = view`<div>${[
+    const v = viewUI`<div>${[
       "array",
       [Inputs.input(0)],
       (v) => Inputs.input(v)
@@ -1517,7 +1751,7 @@ suite.test(
 
 ```js echo
 suite.test("Dynamic Object value property assignment", async () => {
-  const v = view`<div>${["field", Inputs.input()]}`;
+  const v = viewUI`<div>${["field", Inputs.input()]}`;
   v.value = { field: 1 };
   expect(v.field.value).toEqual(1);
   expect(v.value.field).toEqual(1);
@@ -1525,8 +1759,8 @@ suite.test("Dynamic Object value property assignment", async () => {
 ```
 
 ```js echo
-suite.test("Dynamic Object view property assignment", async () => {
-  const v = view`<div>${["field", Inputs.input()]}`;
+suite.test("Dynamic Object viewUI property assignment", async () => {
+  const v = viewUI`<div>${["field", Inputs.input()]}`;
   v.field = Inputs.input("2");
   expect(v.field.value).toEqual("2");
   expect(v.value.field).toEqual("2");
@@ -1537,7 +1771,7 @@ suite.test("Dynamic Object view property assignment", async () => {
 suite.test(
   "Dynamic Object write with builder creates new elements",
   async () => {
-    const v = view`<div>${["...", {}, (v) => Inputs.text({ value: v })]}`;
+    const v = viewUI`<div>${["...", {}, (v) => Inputs.text({ value: v })]}`;
     v.value = { a: "b" };
     expect(v.value).toEqual({ a: "b" });
     expect(v.a).toHaveProperty("name"); // It's a DOM node
@@ -1547,7 +1781,7 @@ suite.test(
 
 ```js echo
 suite.test("Dynamic Object write deletes old elements", async () => {
-  const v = view`<div>${["...", { a: Inputs.text() }]}`;
+  const v = viewUI`<div>${["...", { a: Inputs.text() }]}`;
   expect(v.value).toEqual({ a: "" });
   expect(v.a).toHaveProperty("name"); // It's a DOM node
   v.value = {};
@@ -1558,7 +1792,7 @@ suite.test("Dynamic Object write deletes old elements", async () => {
 
 ```js echo
 suite.test("Collection object creates matching keys", async () => {
-  const v = view`<div>${[
+  const v = viewUI`<div>${[
     "...",
     {
       a: Inputs.input()
@@ -1569,18 +1803,18 @@ suite.test("Collection object creates matching keys", async () => {
 ```
 
 ```js echo
-const toc = async () => {
-  const [{ Runtime }, { default: define }] = await Promise.all([
-    import(
-      "https://cdn.jsdelivr.net/npm/@observablehq/runtime@4/dist/runtime.js"
-    ),
-    import(`https://api.observablehq.com/@nebrius/indented-toc.js?v=3`)
-  ]);
-  const module = new Runtime().module(define);
-  return module.value("toc");
-};
+//const toc = async () => {
+//  const [{ Runtime }, { default: define }] = await Promise.all([
+//    import(
+//      "https://cdn.jsdelivr.net/npm/@observablehq/runtime@4/dist/runtime.js"
+//    ),
+//    import(`https://api.observablehq.com/@nebrius/indented-toc.js?v=3`)
+//  ]);
+//  const module = new Runtime().module(define);
+//  return module.value("toc");
+//};
 
-display (await toc())
+import {toc} from "/components/indented-toc.js"
 ```
 
 ```js
