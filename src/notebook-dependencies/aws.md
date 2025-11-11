@@ -1,5 +1,9 @@
 # AWS Helpers
 
+This is a port of an Observable notebook by <a href="https://observablehq.com/@tomlarkworthy">Tom Larkworthy</a> [@tomlarkworthy] called <a href="https://observablehq.com/@tomlarkworthy/aws">AWS Helpers</a>. All mistakes and deviations from the original are my own.</div>
+
+---
+
 Store AWS credentials in local storage and call the AWS SDK. So far we have added IAM, S3 and CloudFront. If you need more SDK methods, create an web SDK distribution using https://sdk.amazonaws.com/builder/js/ 
 
 ```

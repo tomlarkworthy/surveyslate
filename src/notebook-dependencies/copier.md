@@ -1,6 +1,11 @@
 # Copier
 <!-- https://observablehq.com/@mbostock/copier -->
 
+<div class="tip">
+This notebook ports a notebook by Mike Bostock [@mbostock] called <a href="https://observablehq.com/@mbostock/copier">Copier</a>.  All mistakes and deviations from the original are my own.
+</div>
+
+---
 
 <p style="background: #fffced; box-sizing: border-box; padding: 10px 20px;">***Update Sep. 2021:*** *Buttons are now available as part of [**Observable Inputs**](/@observablehq/inputs), and you can use <code>navigator.clipboard.writeText</code> to copy text to the clipboard! This notebook will remain for history, but please upgrade.*</p>
 
