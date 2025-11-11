@@ -41,6 +41,8 @@ display(saveCreds);
 
 ---
 
+Initially, everything works as expected:
+
 
 ```js echo
 ///!!!!
@@ -56,11 +58,13 @@ display(iam)
 display(getUser)
 ```
 
-
+Note that directly invoking `getuser` returns a promise.
 ```js echo
 const me = getUser()
 display(me)
 ```
+
+We get the expected value with `await`
 
 ```js echo
 ///!!!!
@@ -80,6 +84,14 @@ display(surveys)
 display(listObjects)
 ```
 
+---
+
+Error start when trying to use the `credentials` function.
+
+
+---
+
+Import statement:
 
 ```js echo
 import {listObjects, getObject, putObject, listUsers, createUser, deleteUser, getUser, listAccessKeys, createAccessKey, deleteAccessKey, mfaCode, listUserTags, tagUser, untagUser, iam, s3, listGroups, listGroupsForUser, addUserToGroup, removeUserFromGroup, manualCredentialsElement, manualCredentials, saveCredsElement, saveCreds} from '/components/aws.js';
@@ -89,6 +101,11 @@ import {listObjects, getObject, putObject, listUsers, createUser, deleteUser, ge
 const REGION = 'us-east-2'
 ```
 
+
+
+---
+
+The bits below are to confirm that function look like original notebook: https://observablehq.com/@tomlarkworthy/aws
 
 ```js echo
 display(listObjects)
