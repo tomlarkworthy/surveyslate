@@ -107,6 +107,8 @@ export function applyCredentials(parsed) {
   iam = new AWS.IAM();
   s3  = new AWS.S3({ region: AWS.config.region || REGION });
   cloudFront = new AWS.CloudFront();
+
+  console.log("Applied AWS credentials");
 }
 
 // Parse textarea -> apply to AWS on load and on every input event

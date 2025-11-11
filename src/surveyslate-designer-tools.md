@@ -71,8 +71,7 @@ test credentials for demoEditor (note - these credentials were blocked after bei
     ~~~
 
 ```js
-//viewof login = viewof manualCredentials
-const login_manual_credentials = display(manualCredentialsElement)
+manualCredentialsElement
 ```
 ```js echo
 applyCredentials(
@@ -86,11 +85,13 @@ const credStore = display(saveCredsElement)
 ```
 
 ```js
+login
 const surveyChooserTitle = md`## Survey Chooser`;
 display(surveyChooserTitle)
 ```
 
 ```js
+login
 //viewof survey = Inputs.select(surveys)
 //viewof survey = Inputs.bind(Inputs.select(surveys, {label: "survey"}), localStorageView("designer-project", {
 const surveyElement = Inputs.bind(
@@ -1662,6 +1663,7 @@ display(deployButtonElement)
 ## Cloud Configuration
 
 ```js echo
+login
 const me = getUser()
 ```
 
