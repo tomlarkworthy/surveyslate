@@ -74,7 +74,7 @@ test credentials for demoEditor (note - these credentials were blocked after bei
 manualCredentialsElement
 ```
 ```js echo
-applyCredentials(
+const login = applyCredentials(
   manualCredentials
 )
 display(manualCredentials)
