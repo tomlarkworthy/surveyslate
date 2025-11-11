@@ -892,19 +892,19 @@ import {viewUI} from '/components/view.js'
 ```
 
 ```js echo
-//import {mainColors, accentColors} from "@adb/brand"
+//import {mainColors, accentColors} from "@categorise/brand"
 import {mainColors, accentColors} from "/components/brand.js"
 
 ```
 
 ```js echo
-//import {loadStyles} from '@adb/tachyons-and-some-extras'
+//import {loadStyles} from '@categorise/tachyons-and-some-extras'
 import {loadStyles} from '/components/tachyons-and-some-extras.js'
 ```
 
 ```js echo
-//import { pageHeader, pageFooter } from "@adb/gesi-survey-common-components"
-import { pageHeader, pageFooter } from "/components/gesi-survey-common-components.js"
+//import { pageHeader, pageFooter } from "@categorise/gesi-survey-common-components"
+import { pageHeader, pageFooter } from "/components/surveyslate-common-components.js"
 ```
 
 

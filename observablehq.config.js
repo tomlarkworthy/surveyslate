@@ -18,7 +18,15 @@ export default {
 
 
  pages: [
-          {
+      {
+       name: "Tests",
+       open: true,
+       pages: [
+         //not necessary in context
+         {name: "AWS Helpers", path: "/03-test-aws"},
+       ]
+     },
+       {
        name: "Survey Slate",
        open: true,
        pages: [
@@ -28,12 +36,21 @@ export default {
          //missing
          //{name: "Guide for Survey Designers", path: "/user-guide-for-gesi-survey-designer"},
          
+         { name: "Admin Tools", path: "/surveyslate-admin-tools.md" },
+         { name: "Admin UI", path: "/surveyslate-admin-ui.md" },
+
+         { name: "Designer Tools", path: "/surveyslate-designer-tools" },
+         { name: "Designer UI", path: "/surveyslate-designer-ui.md" },
+
+         
          // identify and renmove duplicate
          { name: "Survey Components", path: "/survey-components" },
          { name: "Survey Slate Components", path: "/surveyslate-components" },
          { name: "Survey Slate Styling", path: "/survey-slate-styling" },
          { name: "Common Components", path: "/surveyslate-common-components" },
          
+         { name: "Common Components", path: "/surveyslate-common-components" },
+
          //looks scary for the moment
          //{ name: "Survey Slate Configuration", path: "/survey-slate-configuration" },
        ]

@@ -1,13 +1,13 @@
 // # AWS Helpers
+// This file is adapted from AWS Helpers by Tom Larkworthy, published as an Observable notebook: https://observablehq.com/@tomlarkworthy/aws
+// Note: The code here has been adapted from the original version to enable it to work as a vanilla JavaScript export.
 
 import * as htl from "/components/htl@0.3.1.js";
 import * as Inputs from "/components/inputs_observable.js";
 import { Generators } from "observablehq:stdlib";
 import { expect } from "/components/testing.js";
 import { randomId } from "/components/randomid.js";
-import { resize } from "/components/resize.js";
 import { localStorage } from "/components/safe-local-storage.js";
-import { signature } from "/components/signature.js";
 
 // Load AWS SDK v2 into window.AWS
 export const AWS = await import("https://unpkg.com/aws-sdk@2.983.0/dist/aws-sdk.min.js").then(
@@ -58,7 +58,7 @@ export const manualCredentialsElement = (() => {
   return wrapper;
 })();
 
-// Keep this export so your import line remains valid.
+// Explicity using Generators rather than Framework's `view` function.
 export const manualCredentials = Generators.input(manualCredentialsElement);
 
 export const saveCredsElement = htl.html`<span style="display: flex">${Inputs.button(

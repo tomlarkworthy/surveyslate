@@ -1,4 +1,4 @@
-//# GESI Survey | Designer Tools
+//# Survey Slate | Designer Tools
 
 import { Generators } from "observablehq:stdlib";
 
@@ -18,11 +18,11 @@ import {dataEditor} from '/components/dataeditor.js';
 //import {localStorageView} from '@tomlarkworthy/local-storage-view'
 import {localStorageView} from '/components/local-storage-view.js';
 
-//import {pageHeader, pageFooter, buttonLabel} from "@adb/gesi-survey-common-components";
-import {pageHeader, pageFooter, buttonLabel} from "/components/gesi-survey-common-components.js";
+//import {pageHeader, pageFooter, buttonLabel} from "@categorise/surveyslate-common-components";
+import {pageHeader, pageFooter, buttonLabel} from "/components/surveyslate-common-components.js";
 
-//import {surveyEditor, styles as designUiStyles, tachyons} from '@adb/gesi-survey-designer-ui'
-import {surveyEditor, styles as designUiStyles, tachyons} from '/components/gesi-survey-designer-ui.js';
+//import {surveyEditor, styles as designUiStyles, tachyons} from '@categorise/surveyslate-designer-ui'
+import {surveyEditor, styles as designUiStyles, tachyons} from '/components/surveyslate-designer-ui.js';
 
 ///!!!!
 ///RuntimeError: iam.getUser is not a function (see myTags)
@@ -31,8 +31,8 @@ import {surveyEditor, styles as designUiStyles, tachyons} from '/components/gesi
 //import {listObjects, getObject, putObject, listUsers, createUser, deleteUser, getUser, listAccessKeys, createAccessKey, deleteAccessKey, manualCredentialsElement, manualCredentials, mfaCode, saveCredsElement, saveCreds, listUserTags, tagUser, untagUser, iam, s3, listGroups, listGroupsForUser, addUserToGroup, removeUserFromGroup} from '/components/aws.js';
 import {listObjects, getObject, putObject, listUsers, createUser, deleteUser, getUser, listAccessKeys, createAccessKey, deleteAccessKey, manualCredentialsElement, manualCredentials,mfaCode, saveCredsElement, saveCreds, listUserTags, tagUser, untagUser, iam, s3, listGroups, listGroupsForUser, addUserToGroup, removeUserFromGroup} from '/components/aws.js';
 
-//import {createQuestion, reifyAttributes, bindLogic, setTypes, surveyView, config} from '@adb/gesi-survey-components'
-import {createQuestion, reifyAttributes, bindLogic, setTypes, surveyView, config} from '/components/gesi-survey-components.js';
+//import {createQuestion, reifyAttributes, bindLogic, setTypes, surveyView, config} from '@categorise/survey-components'
+import {createQuestion, reifyAttributes, bindLogic, setTypes, surveyView, config} from '/components/survey-components.js';
 
 
 //## Helpers
