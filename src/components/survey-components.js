@@ -33,7 +33,7 @@ import {mainColors, accentColors} from "/components/brand.js";
 import {loadStyles} from "/components/tachyons-and-some-extras.js"
 
 //import {textNodeView} from "@adb/gesi-survey-common-components"
-import {textNodeView} from "/components/gesi-survey-common-components.js"
+import {textNodeView} from "/components/surveyslate-common-components.js"
 
 //import {createSuite, expect} from '@tomlarkworthy/testing'
 import {createSuite, expect} from '/components/testing.js'
