@@ -85,7 +85,7 @@ export let credentials = null;        // last valid parsed creds
 export let mfaCode = "";              // exported for compatibility with your import line
 
 // Apply parsed credentials to AWS.config and refresh service clients
-function applyCredentials(parsed) {
+export function applyCredentials(parsed) {
   // Support either {accessKeyId, secretAccessKey, sessionToken?}
   const { accessKeyId, secretAccessKey, sessionToken, region } = parsed || {};
 
