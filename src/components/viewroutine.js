@@ -6,6 +6,8 @@ import * as Inputs from "/components/inputs_observable.js";
 import * as Promises from "/components/promises.js"
 import { Mutable } from "@observablehq/stdlib";
 
+import * as htl from "/components/htl@0.3.1.js";
+
 import markdownit from "markdown-it";
 
 const Markdown = new markdownit({html: true});

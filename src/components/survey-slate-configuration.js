@@ -1,7 +1,7 @@
 //# Survey Slate | Configuration
 
 
-export const config = ({
+export const config = {
   // All artifacts in the PUBLIC bucket are on the internet
   PUBLIC_BUCKET: "public-publicwrfxcsvqwpcgcrpx",
   // The private bucket requires credentials to access, should be for system wide things like user lists
@@ -18,11 +18,11 @@ export const config = ({
   CLOUD_FRONT_DISTRIBUTION_ID: 'EG13QGKCG6LI9',
   // URL that hosts appplications
   CLOUD_FRONT_URL: 'https://www.surveyslate.org',
-})
+}
 
 
 
-export const notebooks = ({
+export const notebooks = {
   configuration: "https://observablehq.com/@categorise/survey-slate-configuration",
   admin: "https://observablehq.com/@adb/gesi-survey-admin-tools",
   designer: "https://observablehq.com/@/gesi-survey-designer-tools",
@@ -37,25 +37,25 @@ export const notebooks = ({
   component_designer_ui: "https://observablehq.com/@adb/gesi-survey-designer-ui",
   analysis: "https://observablehq.com/@adb/analysis-template?collection=@adb/gesi-self-assessment",
   credential: "https://observablehq.com/@adb/gesi-self-assessment-credentials?collection=@adb/gesi-self-assessment", 
-})
+}
 
 
 
-export const links = ({
+export const links = {
   public_bucket: "https://s3.console.aws.amazon.com/s3/buckets/public-publicwrfxcsvqwpcgcrpx?region=us-east-1",
   private_bucket: "https://s3.console.aws.amazon.com/s3/buckets/private-mjgvubdpwmdipjsn?region=us-east-1",
   confidential_bucket: "https://s3.console.aws.amazon.com/s3/buckets/confidential-bspqugxjstgxwjnt?region=us-east-1",
   iam_policy: "https://us-east-1.console.aws.amazon.com/iam/home#/policies/arn:aws:iam::032151534090:policy/user$jsonEditor",
   gesi_content: "https://docs.google.com/spreadsheets/d/1R9xJxF-Ry0SljqNfg9iiCcwRqDUU9hvc"
-})
+}
 
 
 
 // These are not sensitive and don't matter if leak as they are just attached to test accounts
-export const accounts = ({
+export const accounts = {
   username_demo: "demoResponder",
   password_demo: "FnMcjZO1pn1uqmMh",
   username_test: "testUser",
   password_test: "Kp0YtJIgI6RuUWUo",
-})
+}
 

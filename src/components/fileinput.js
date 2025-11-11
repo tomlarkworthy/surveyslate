@@ -4,6 +4,8 @@
 //import { LocalFile } from '@mbostock/localfile'
 //import { LocalFile } from '/components/localfile.js';
 
+import * as htl from "/components/htl@0.3.1.js";
+
 import * as Inputs from "/components/inputs_observable.js";
 import {FileAttachment} from "observablehq:stdlib";
 
@@ -31,30 +33,64 @@ export function fileInput({ prompt = 'Drag a file here', accept = null } = {}) {
     input.classList.remove("hover");
   };
 
+/// NOTE: Color definitions changed from original to accommodate dark mode.
+
   return viewUI`<div class="dropfileContainer">
     <style>
-      .dropfileContainer > input[type=file] {
-        width:100%;
-        height:80px;
-        background:#fefef2;
-        border:solid 2px black;
-        border-radius: 10px;
-        padding-top: 10px;
+      .dropfileContainer {
+        position: relative;
+        color-scheme: light dark;
       }
-      
+
+      .dropfileContainer > input[type=file] {
+        width: 100%;
+        height: 80px;
+        border-radius: 10px;
+        border: 2px solid;
+        padding-top: 10px;
+        cursor: pointer;
+        background: var(--drop-bg, #fefef2);
+        color: var(--drop-fg, inherit);
+      }
+
       .dropfileContainer > input[type=file].hover {
-        background: #deded2;
+        background: var(--drop-bg-hover, #deded2);
+      }
+
+      .dropfileContainer > p {
+        position: absolute;
+        margin-top: 30px;
+        margin-left: auto;
+        margin-right: auto;
+        left: 0;
+        right: 0;
+        text-align: center;
+        pointer-events: none;
+        color: var(--drop-text, inherit);
+      }
+
+      /* Light mode defaults */
+      @media (prefers-color-scheme: light) {
+        .dropfileContainer {
+          --drop-bg: #fefef2;
+          --drop-bg-hover: #deded2;
+          --drop-fg: #000000;
+          --drop-text: #333333;
+        }
+      }
+
+      /* Dark mode overrides */
+      @media (prefers-color-scheme: dark) {
+        .dropfileContainer {
+          --drop-bg: #1f2933;       /* dark slate */
+          --drop-bg-hover: #323f4b; /* slightly lighter on hover */
+          --drop-fg: #f9fafb;
+          --drop-text: #e5e7eb;
+        }
       }
     </style>
 
-    <p style="position: absolute;
-              margin-top: 30px;
-              margin-left: auto;
-              margin-right: auto;
-              left: 0;
-              right: 0;
-              text-align: center;
-              pointer-events: none;">
+    <p>
       ${prompt}
     </p>
     ${input}
