@@ -71,11 +71,10 @@ test credentials for demoEditor (note - these credentials were blocked after bei
     ~~~
 
 ```js
-//viewof login = viewof manualCredentials
-const login_manual_credentials = display(manualCredentialsElement)
+manualCredentialsElement
 ```
 ```js echo
-applyCredentials(
+const login = applyCredentials(
   manualCredentials
 )
 display(manualCredentials)
@@ -1662,6 +1661,7 @@ display(deployButtonElement)
 ## Cloud Configuration
 
 ```js echo
+login
 const me = getUser()
 ```
 
