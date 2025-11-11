@@ -1,7 +1,7 @@
 # Survey Slate | Configuration
 
-```js echo
-const config = ({
+```js 
+const config = display({
   // All artifacts in the PUBLIC bucket are on the internet
   PUBLIC_BUCKET: "public-publicwrfxcsvqwpcgcrpx",
   // The private bucket requires credentials to access, should be for system wide things like user lists
@@ -21,8 +21,8 @@ const config = ({
 })
 ```
 
-```js echo
-const notebooks = ({
+```js 
+const notebooks = display({
   configuration: "https://observablehq.com/@categorise/survey-slate-configuration",
   admin: "https://observablehq.com/@adb/gesi-survey-admin-tools",
   designer: "https://observablehq.com/@/gesi-survey-designer-tools",
@@ -40,8 +40,8 @@ const notebooks = ({
 })
 ```
 
-```js echo
-const links = ({
+```js 
+const links = display({
   public_bucket: "https://s3.console.aws.amazon.com/s3/buckets/public-publicwrfxcsvqwpcgcrpx?region=us-east-1",
   private_bucket: "https://s3.console.aws.amazon.com/s3/buckets/private-mjgvubdpwmdipjsn?region=us-east-1",
   confidential_bucket: "https://s3.console.aws.amazon.com/s3/buckets/confidential-bspqugxjstgxwjnt?region=us-east-1",
@@ -50,9 +50,9 @@ const links = ({
 })
 ```
 
-```js echo
+```js 
 // These are not sensitive and don't matter if leak as they are just attached to test accounts
-const accounts = ({
+const accounts = display({
   username_demo: "demoResponder",
   password_demo: "FnMcjZO1pn1uqmMh",
   username_test: "testUser",
