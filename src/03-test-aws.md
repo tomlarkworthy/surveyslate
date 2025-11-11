@@ -82,7 +82,7 @@ display(listObjects)
 
 
 ```js echo
-import {listObjects, getObject, putObject, listUsers, createUser, deleteUser, getUser, listAccessKeys, createAccessKey, deleteAccessKey, mfaCode, listUserTags, tagUser, untagUser, iam, s3, listGroups, listGroupsForUser, addUserToGroup, removeUserFromGroup, manualCredentialsElement, manualCredentials, saveCredsElement, saveCreds} from '/components/aws_experimental_error.js';
+import {listObjects, getObject, putObject, listUsers, createUser, deleteUser, getUser, listAccessKeys, createAccessKey, deleteAccessKey, mfaCode, listUserTags, tagUser, untagUser, iam, s3, listGroups, listGroupsForUser, addUserToGroup, removeUserFromGroup, manualCredentialsElement, manualCredentials, saveCredsElement, saveCreds} from '/components/aws.js';
 ```
 
 ```js echo
