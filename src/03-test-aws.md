@@ -86,9 +86,11 @@ display(listObjects)
 
 ---
 
-Error start when trying to use the `credentials` function.
+Error start when trying to use anything that relies the `credentials` function, for example the helpers that are tied to S3:
 
-
+```js echo
+display(await listObjects())
+```
 ---
 
 Import statement:
@@ -104,7 +106,7 @@ const REGION = 'us-east-2'
 
 
 ---
-
+<!--
 The bits below are to confirm that function look like original notebook: https://observablehq.com/@tomlarkworthy/aws
 
 ```js echo
@@ -185,4 +187,4 @@ display(addUserToGroup)
 ```js echo
 display(removeUserFromGroup)
 ```
-
+-->
